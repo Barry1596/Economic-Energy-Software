@@ -88,3 +88,7 @@ docs/_build/
 outputs/generated/
 *.xlsx.tmp
 benchmarks/results/
+
+# Generated outputs from examples
+*.xlsx
+*.pdf

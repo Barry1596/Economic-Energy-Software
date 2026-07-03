@@ -61,6 +61,7 @@ dev = [
     "ruff>=0.1",
     "mypy>=1.0",
     "pre-commit>=3.0",
+    "streamlit>=1.28",
 ]
 docs = [
     "mkdocs>=1.5",
@@ -70,6 +71,9 @@ docs = [
 examples = [
     "jupyter>=1.0",
     "ipykernel>=6.0",
+]
+web = [
+    "streamlit>=1.28",
 ]
 
 [project.urls]

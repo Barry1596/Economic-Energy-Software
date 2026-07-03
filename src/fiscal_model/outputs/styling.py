@@ -143,6 +143,4 @@ def get_matplotlib_style() -> dict:
         "legend.frameon": False,
         "legend.fontsize": FONT_SIZE_CAPTION,
         "legend.labelcolor": ABU_GELAP,
-        # No more defaults with lots of colors
-        "axes.prop_cycle": None,
     }

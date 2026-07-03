@@ -105,8 +105,10 @@ def main():
     print(f"   Cum. Prod:  {result.cumulative_production_mmboe:.2f} MMBOE")
     print(f"   ---")
     print(f"   NPV:        ${result.npv_contractor:,.0f}")
-    print(f"   IRR:        {result.irr_contractor:.1%}")
-    print(f"   Payback:    {result.payback_period_years:.1f} yrs" if result.payback_period_years else "   Payback: N/A")
+    irr_str = f"{result.irr_contractor:.1%}" if result.irr_contractor != float("inf") else ">999%"
+    pb_str = "Immediate" if result.payback_period_years == 0.0 else (f"{result.payback_period_years:.1f} yrs" if result.payback_period_years else "N/A")
+    print(f"   IRR:        {irr_str}")
+    print(f"   Payback:    {pb_str}")
     print(f"   PI:         {result.profitability_index:.2f}")
     print(f"   Gov. Take:  {result.government_take_pct_of_gross:.1f}%")
     print(f"   ---")

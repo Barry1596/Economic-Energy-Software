@@ -238,9 +238,9 @@ class PDFReportGenerator:
         t.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), HexColor(NAVY)),
             ("TEXTCOLOR", (0, 0), (-1, 0), HexColor(PUTIH)),
-            ("FONTNAME", (0, 0), (-1, -1), FONT_BODY),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
             ("FONTSIZE", (0, 0), (-1, -1), FONT_SIZE_BODY),
-            ("FONTNAME", (0, 0), (-1, 0), FONT_HEADING),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
             ("ALIGN", (1, 0), (1, -1), "RIGHT"),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             ("GRID", (0, 0), (-1, -1), 0.5, HexColor(AKSEN)),
@@ -301,7 +301,7 @@ class PDFReportGenerator:
             ("BACKGROUND", (0, 0), (-1, 0), HexColor(NAVY)),
             ("TEXTCOLOR", (0, 0), (-1, 0), HexColor(PUTIH)),
             ("BACKGROUND", (0, 1), (-1, 1), HexColor(PUTIH)),
-            ("FONTNAME", (0, 0), (-1, -1), FONT_HEADING),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
             ("FONTSIZE", (0, 0), (-1, 0), FONT_SIZE_BODY),
             ("FONTSIZE", (0, 1), (-1, 1), 28),
             ("TEXTCOLOR", (0, 1), (-1, 1), HexColor(NAVY)),
@@ -328,14 +328,17 @@ class PDFReportGenerator:
         )
 
     def _build_styles(self) -> dict:
-        """Build custom paragraph styles."""
+        """Build custom paragraph styles using standard reportlab fonts."""
         base = getSampleStyleSheet()
+        # Use Helvetica (always available) — Lato requires extra font registration
+        font_h = "Helvetica-Bold"
+        font_b = "Helvetica"
 
         styles = {
             "cover_title": ParagraphStyle(
                 "cover_title",
                 parent=base["Title"],
-                fontName=FONT_HEADING,
+                fontName=font_h,
                 fontSize=32,
                 leading=38,
                 textColor=HexColor(NAVY),
@@ -345,7 +348,7 @@ class PDFReportGenerator:
             "cover_subtitle": ParagraphStyle(
                 "cover_subtitle",
                 parent=base["Normal"],
-                fontName=FONT_BODY,
+                fontName=font_b,
                 fontSize=14,
                 textColor=HexColor(AKSEN),
                 alignment=TA_CENTER,
@@ -354,7 +357,7 @@ class PDFReportGenerator:
             "cover_gov": ParagraphStyle(
                 "cover_gov",
                 parent=base["Normal"],
-                fontName=FONT_BODY,
+                fontName=font_b,
                 fontSize=12,
                 leading=16,
                 textColor=HexColor(ABU_GELAP),
@@ -364,7 +367,7 @@ class PDFReportGenerator:
             "metadata": ParagraphStyle(
                 "metadata",
                 parent=base["Normal"],
-                fontName=FONT_BODY,
+                fontName=font_b,
                 fontSize=9,
                 textColor=HexColor(ABU_GELAP),
                 alignment=TA_CENTER,
@@ -372,7 +375,7 @@ class PDFReportGenerator:
             "h1": ParagraphStyle(
                 "h1",
                 parent=base["Heading1"],
-                fontName=FONT_HEADING,
+                fontName=font_h,
                 fontSize=FONT_SIZE_H2,
                 leading=26,
                 textColor=HexColor(NAVY),
@@ -381,7 +384,7 @@ class PDFReportGenerator:
             "h3": ParagraphStyle(
                 "h3",
                 parent=base["Heading3"],
-                fontName=FONT_HEADING,
+                fontName=font_h,
                 fontSize=12,
                 textColor=HexColor(BIRU_PRIMER),
                 spaceAfter=4,
@@ -389,7 +392,7 @@ class PDFReportGenerator:
             "body": ParagraphStyle(
                 "body",
                 parent=base["Normal"],
-                fontName=FONT_BODY,
+                fontName=font_b,
                 fontSize=FONT_SIZE_BODY,
                 leading=FONT_SIZE_BODY * 1.4,
                 textColor=HexColor(TEKS_ISI),
@@ -398,7 +401,7 @@ class PDFReportGenerator:
             "callout": ParagraphStyle(
                 "callout",
                 parent=base["Normal"],
-                fontName=FONT_BODY,
+                fontName=font_b,
                 fontSize=FONT_SIZE_BODY,
                 leading=FONT_SIZE_BODY * 1.4,
                 textColor=HexColor(TEKS_ISI),

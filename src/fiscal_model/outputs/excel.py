@@ -135,8 +135,10 @@ class ExcelReportGenerator:
 
         # KPI tiles (3 tiles in one row: NPV, IRR, Payback)
         self._add_kpi_tile(ws, r, 1, "NPV (Net Present Value)", f"${res.npv_contractor:,.0f}")
+        irr_val = res.irr_contractor
+        irr_display = f">{999:.0f}%" if irr_val == float("inf") else f"{irr_val:.1%}"
         self._add_kpi_tile(
-            ws, r, 4, "IRR (Internal Rate of Return)", f"{res.irr_contractor:.1%}"
+            ws, r, 4, "IRR (Internal Rate of Return)", irr_display
         )
         pb = f"{res.payback_period_years:.1f} yrs" if res.payback_period_years else "N/A"
         self._add_kpi_tile(ws, r, 7, "Payback Period", pb)
@@ -165,7 +167,7 @@ class ExcelReportGenerator:
             for w in res.warnings:
                 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=8)
                 ws[f"A{r}"] = f"⚠ {w}"
-                ws[f"A{r}"].font = Font(name=FONT_BODY, size=FONT_SIZE_BODY, color=NEGATIF)
+                ws[f"A{r}"].font = self._style_negatif
                 r += 1
 
         self._set_col_widths(ws, [18, 22, 18, 22, 18, 22, 18, 22])
@@ -190,7 +192,7 @@ class ExcelReportGenerator:
         # Governing thought
         ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=n + 1)
         ws[f"A{r}"] = "Contractor cashflow positive from year 3 onward; cumulative payback achieved in year 5."
-        ws[f"A{r}"].font = Font(name=FONT_BODY, size=FONT_SIZE_CAPTION, italic=True, color=ABU_GELAP)
+        ws[f"A{r}"].font = self._style_caption
         r += 2
 
         # Header row (years)
@@ -322,25 +324,46 @@ class ExcelReportGenerator:
 
     # ── Style helpers ────────────────────────────────────────────────
 
+    @staticmethod
+    def _argb(hex_color: str) -> str:
+        """Convert 6-char hex (#0B2545) to aRGB (FF0B2545) for openpyxl."""
+        hex_color = hex_color.lstrip("#")
+        return f"FF{hex_color}"
+
     def _setup_styles(self) -> None:
         """Pre-build named styles used across sheets."""
-        self._fill_navy = PatternFill(start_color=NAVY, end_color=NAVY, fill_type="solid")
-        self._fill_biru = PatternFill(start_color=BIRU_PRIMER, end_color=BIRU_PRIMER, fill_type="solid")
-        self._fill_zebra = PatternFill(start_color=ZEBRA_STRIP, end_color=ZEBRA_STRIP, fill_type="solid")
-        self._fill_abu = PatternFill(start_color=ABU_TERANG, end_color=ABU_TERANG, fill_type="solid")
+        # Convert all colors to aRGB for openpyxl
+        navy = self._argb(NAVY)
+        biru = self._argb(BIRU_PRIMER)
+        abu_gelap = self._argb(ABU_GELAP)
+        abu_terang = self._argb(ABU_TERANG)
+        aksen = self._argb(AKSEN)
+        putih = self._argb(PUTIH)
+        teks = self._argb(TEKS_ISI)
+        zebra = self._argb(ZEBRA_STRIP)
+        negatif = self._argb(NEGATIF)
+
+        self._fill_navy = PatternFill(start_color=navy, end_color=navy, fill_type="solid")
+        self._fill_biru = PatternFill(start_color=biru, end_color=biru, fill_type="solid")
+        self._fill_zebra = PatternFill(start_color=zebra, end_color=zebra, fill_type="solid")
+        self._fill_abu = PatternFill(start_color=abu_terang, end_color=abu_terang, fill_type="solid")
         self._thin_border = Border(
-            bottom=Side(style="thin", color=AKSEN),
+            bottom=Side(style="thin", color=aksen),
         )
 
-        self._style_kicker = Font(name=FONT_HEADING, size=10, color=AKSEN, bold=True)
-        self._style_gov = Font(name=FONT_HEADING, size=FONT_SIZE_H1, color=NAVY, bold=True)
-        self._style_h2 = Font(name=FONT_HEADING, size=FONT_SIZE_H2, color=NAVY, bold=True)
-        self._style_h3 = Font(name=FONT_HEADING, size=12, color=BIRU_PRIMER, bold=True)
-        self._style_th = Font(name=FONT_HEADING, size=FONT_SIZE_BODY, color=PUTIH, bold=True)
-        self._style_data = Font(name=FONT_BODY, size=FONT_SIZE_BODY, color=TEKS_ISI)
-        self._style_label_bold = Font(name=FONT_BODY, size=FONT_SIZE_BODY, color=TEKS_ISI, bold=True)
-        self._style_total_label = Font(name=FONT_HEADING, size=FONT_SIZE_BODY, color=BIRU_PRIMER, bold=True)
-        self._style_total = Font(name=FONT_HEADING, size=FONT_SIZE_BODY, color=BIRU_PRIMER, bold=True)
+        self._style_kicker = Font(name=FONT_HEADING, size=10, color=aksen, bold=True)
+        self._style_gov = Font(name=FONT_HEADING, size=FONT_SIZE_H1, color=navy, bold=True)
+        self._style_h2 = Font(name=FONT_HEADING, size=FONT_SIZE_H2, color=navy, bold=True)
+        self._style_h3 = Font(name=FONT_HEADING, size=12, color=biru, bold=True)
+        self._style_th = Font(name=FONT_HEADING, size=FONT_SIZE_BODY, color=putih, bold=True)
+        self._style_data = Font(name=FONT_BODY, size=FONT_SIZE_BODY, color=teks)
+        self._style_label_bold = Font(name=FONT_BODY, size=FONT_SIZE_BODY, color=teks, bold=True)
+        self._style_total_label = Font(name=FONT_HEADING, size=FONT_SIZE_BODY, color=biru, bold=True)
+        self._style_total = Font(name=FONT_HEADING, size=FONT_SIZE_BODY, color=biru, bold=True)
+        self._style_negatif = Font(name=FONT_BODY, size=FONT_SIZE_BODY, color=negatif)
+        self._style_caption = Font(name=FONT_BODY, size=FONT_SIZE_CAPTION, color=abu_gelap, italic=True)
+        self._style_white_caption = Font(name=FONT_BODY, size=FONT_SIZE_CAPTION, color=putih)
+        self._style_white_kpi = Font(name=FONT_HEADING, size=32, color=putih, bold=True)
 
     def _apply_page_setup(self, ws: Worksheet) -> None:
         """Apply kosmetik-dokumen page layout to a worksheet."""
@@ -361,13 +384,13 @@ class ExcelReportGenerator:
         """Add a KPI tile box (navy background, white big number)."""
         ws.merge_cells(start_row=row, start_column=col, end_row=row, end_column=col + 2)
         cell_label = ws.cell(row=row, column=col, value=label)
-        cell_label.font = Font(name=FONT_BODY, size=FONT_SIZE_CAPTION, color=PUTIH)
+        cell_label.font = self._style_white_caption
         cell_label.fill = self._fill_navy
         cell_label.alignment = Alignment(horizontal="center", vertical="bottom")
 
         ws.merge_cells(start_row=row + 1, start_column=col, end_row=row + 1, end_column=col + 2)
         cell_val = ws.cell(row=row + 1, column=col, value=value)
-        cell_val.font = Font(name=FONT_HEADING, size=32, color=PUTIH, bold=True)
+        cell_val.font = self._style_white_kpi
         cell_val.fill = self._fill_navy
         cell_val.alignment = Alignment(horizontal="center", vertical="top")
 

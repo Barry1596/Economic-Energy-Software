@@ -335,7 +335,7 @@ class PSCCostRecovery(FiscalRegime):
                 f"Unrecovered costs at end of model horizon: ${unrecovered:,.0f}. "
                 "Consider extending the model horizon or increasing the cost recovery ceiling."
             )
-        if project_irr < self._input.discount_rate_pct:
+        if project_irr != float("inf") and project_irr < self._input.discount_rate_pct:
             msgs.append(
                 f"IRR ({project_irr:.1%}) is below the discount rate "
                 f"({self._input.discount_rate_pct:.1%}). Project destroys value on a net basis."

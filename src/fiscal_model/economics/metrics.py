@@ -38,14 +38,22 @@ def irr(cashflows: list[float], guess: float = 0.10) -> float:
         guess: Initial guess for the root-finding algorithm.
 
     Returns:
-        IRR as a decimal. Returns 0.0 if IRR cannot be found (all-negative cashflows).
+        IRR as a decimal. Returns ``float('inf')`` if all cashflows are
+        non-negative (no investment required / fully cost-recovered from day 1).
+        Returns ``0.0`` if all cashflows are non-positive.
     """
+    # Edge cases: all-positive or all-negative cashflows
+    if all(cf >= 0 for cf in cashflows):
+        return float("inf")  # No investment needed → infinite return
+    if all(cf <= 0 for cf in cashflows):
+        return 0.0
+
     if npf is not None:
         try:
-            return npf.irr(cashflows)
+            result = npf.irr(cashflows)
+            return result if not (result is None or (isinstance(result, float) and result != result)) else 0.0
         except Exception:
             return 0.0
-    # Pure-Python fallback (Newton-Raphson simplified)
     return _irr_fallback(cashflows, guess)
 
 
@@ -70,13 +78,18 @@ def payback_period(cashflows: list[float]) -> float | None:
     Simple payback period (undiscounted).
 
     Returns:
-        Number of years to recover the initial investment, or None if never reached.
+        Number of years to recover the initial investment.
+        Returns ``0.0`` if all cashflows are non-negative (immediate payback).
+        Returns ``None`` if never reached.
     """
+    # Edge case: all cashflows are non-negative → immediate payback
+    if all(cf >= 0 for cf in cashflows):
+        return 0.0
+
     cumulative = 0.0
     for t, cf in enumerate(cashflows):
         cumulative += cf
         if cumulative >= 0:
-            # Linear interpolation within the year
             if t == 0:
                 return 0.0
             prev_cumulative = cumulative - cf

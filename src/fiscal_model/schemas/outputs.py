@@ -54,12 +54,15 @@ class PSCResult(BaseModel, extra="forbid"):
     government: FiscalBreakdown
 
     # Summary economics
-    npv_contractor: NonNegativeFloat = Field(ge=0.0, description="NPV at discount_rate_pct")
+    # NOTE: npv_contractor sengaja dibebaskan (float) — proyek tidak layak
+    # memiliki NPV negatif, dan itu adalah output analisis yang valid.
+    npv_contractor: float = Field(description="NPV at discount_rate_pct (boleh negatif)")
     irr_contractor: float = Field(description="IRR (decimal)")
     payback_period_years: Optional[float] = Field(
         default=None, description="Payback period in years (None if not reached)"
     )
-    profitability_index: NonNegativeFloat = Field(ge=0.0)
+    # profitability_index juga boleh < 1.0 (bahkan 0) untuk proyek yang merugi
+    profitability_index: float = Field(ge=0.0)
 
     # Cost recovery
     total_cost_recovery: NonNegativeFloat

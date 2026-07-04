@@ -84,6 +84,50 @@ ExcelReportGenerator(result).save("mini_refinery_financial_model.xlsx")
 
 ---
 
+## 🖥️ Run Web App (GUI di Localhost)
+
+Pilihan yang paling mudah untuk pengguna non-developer:
+
+### Opsi A — Double-click (Windows)
+1. Buka folder project di File Explorer
+2. **Double-click `run_app.bat`**
+3. Browser otomatis membuka **http://localhost:8501**
+
+### Opsi B — Command line
+```bash
+cd energi-economic-software
+streamlit run app.py
+```
+Streamlit akan print:
+```
+Local URL: http://localhost:8501
+```
+Buka URL itu di browser.
+
+### Opsi C — Headless / custom port
+```bash
+streamlit run app.py --server.port 8501 --server.headless true
+```
+
+### Troubleshooting
+
+| Masalah | Solusi |
+|---------|--------|
+| `streamlit: command not found` | `pip install streamlit` lalu restart terminal |
+| Port 8501 sudah dipakai | `streamlit run app.py --server.port 8502` |
+| Browser tidak otomatis terbuka | Buka manual: **http://localhost:8501** |
+| Halaman blank / loading terus | Cek terminal tempat `streamlit run` dijalankan — error traceback ada di sana |
+| `Connection refused` | Pastikan server masih running (jangan tutup terminal) |
+| Import error `fiscal_model` | `pip install -e .` di folder project |
+
+### Cara Pakai App
+1. Atur parameter di **sidebar kiri** (production, price, capex, opex, fiscal terms PSC)
+2. Klik tombol **🚀 Run Financial Model**
+3. Hasil muncul di halaman utama: KPI tiles + governing thought
+4. Tab **⬇️ Export** untuk download Excel (BCG style) atau PDF (investment memo)
+
+---
+
 ## Architecture
 
 ```

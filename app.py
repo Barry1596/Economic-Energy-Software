@@ -15,18 +15,21 @@ from __future__ import annotations
 
 import io
 import math
-import tempfile
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Pastikan src/ ada di path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
+# Set matplotlib backend SEBELUM import pyplot (mencegah warning & memastikan headless)
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
 
-from fiscal_model.schemas.inputs import (
+import streamlit as st  # noqa: E402
+import pandas as pd  # noqa: E402
+
+from fiscal_model.schemas.inputs import (  # noqa: E402
     PSCInput,
     ProductionProfile,
     ProductionProfileVectors,
@@ -36,18 +39,15 @@ from fiscal_model.schemas.inputs import (
     OpexSchedule,
     OpexCategory,
 )
-from fiscal_model.fiscal.psc import PSCCostRecovery
-from fiscal_model.economics.metrics import npv, irr
-from fiscal_model.outputs.excel import ExcelReportGenerator
-from fiscal_model.outputs.pdf import PDFReportGenerator
-from fiscal_model.outputs.charts import (
+from fiscal_model.fiscal.psc import PSCCostRecovery  # noqa: E402
+from fiscal_model.outputs.excel import ExcelReportGenerator  # noqa: E402
+from fiscal_model.outputs.pdf import PDFReportGenerator  # noqa: E402
+from fiscal_model.outputs.charts import (  # noqa: E402
     waterfall_chart,
     trend_chart,
-    tornado_chart,
     bar_horizontal_sorted,
-    figure_to_bytes,
 )
-from fiscal_model.outputs.styling import (
+from fiscal_model.outputs.styling import (  # noqa: E402
     NAVY,
     BIRU_PRIMER,
     PUTIH,
@@ -200,7 +200,14 @@ with st.sidebar:
     # ── Capex ──
     st.markdown("### 🏗️ Capital Expenditure")
     total_capex_mm = st.number_input("Total Capex (Million USD)", 1.0, 5000.0, 80.0, step=1.0)
-    capex_spread = st.slider("Capex spread over first N years", 1, 5, 3)
+    # Clamp max to project_horizon to avoid IndexError (capex year outside model years)
+    capex_spread = st.slider(
+        "Capex spread over first N years",
+        1,
+        max(1, min(5, project_horizon)),
+        min(3, project_horizon),
+        help=f"Maksimal = horizon proyek ({project_horizon} tahun)",
+    )
     cr_life = st.slider("CR Depreciation Life (years)", 3, 20, 10)
 
     st.divider()
@@ -260,13 +267,14 @@ def build_input() -> PSCInput:
         escalation_pct=price_esc,
     )
 
-    # Capex
+    # Capex (clamp spread ke horizon untuk safety, mencegah IndexError)
     total_capex = total_capex_mm * 1_000_000
-    annual_capex = total_capex / capex_spread
+    spread = min(capex_spread, n)  # Safety clamp — tidak boleh melebihi horizon
+    annual_capex = total_capex / spread
     capex_items = []
     categories = ["Engineering", "Equipment", "Construction", "Pipeline", "Infrastructure"]
-    for i in range(capex_spread):
-        cat = categories[i % len(categories)] if capex_spread <= len(categories) else f"Phase {i+1}"
+    for i in range(spread):
+        cat = categories[i % len(categories)] if spread <= len(categories) else f"Phase {i+1}"
         capex_items.append(
             CapexScheduleItem(
                 category=cat,

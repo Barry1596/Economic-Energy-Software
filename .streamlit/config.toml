@@ -1,0 +1,22 @@
+# Streamlit theme — Energi Economic Software
+# Menerapkan palet kosmetik-dokumen (navy + aksen, BCG/McKinsey tone)
+
+[theme]
+base = "light"
+primaryColor = "#0B2545"          # navy — tombol utama, accent
+backgroundColor = "#FFFFFF"        # putih — body
+secondaryBackgroundColor = "#F9FAFB"  # zebra strip / sidebar
+textColor = "#1F2937"              # teks_isi — body
+font = "sans serif"
+
+[theme.fontFaces]
+# Streamlit akan resolve ke font lokal yang ter-install (Inter/Lato)
+# Kalau belum ter-install, fallback ke Calibri/Arial otomatis
+
+[server]
+port = 8501
+headless = true
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
